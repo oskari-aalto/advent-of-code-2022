@@ -5,12 +5,6 @@ def path_to_data(data_folder: str, filename: str) -> str:
     data_file = os.path.join(main_dir, data_folder)
     return os.path.join(data_file, filename)
 
-def top_crates_on_stacks(stacks: dict) -> str:
-    result = ''
-    for stack in stacks:
-        result += stacks[stack][-1]
-    return result
-
 def store_drawing(drawing_data: list, data: str):
     drawing_data.append(data)
 
@@ -27,14 +21,20 @@ def process_drawing(drawing_data: list, stacks_dynamic: dict):
             line = line + ' '
             line_lenght = len(line)
             stack = 1
+            # consider using .split() instead of couting characters in string
             for crate in range(4, line_lenght + 1, 4):
+                # check if the crate is empty
                 if line[crate - 4 : crate][1:2] == ' ':
                     pass
                 else:
                     stacks_dynamic[str(stack)].append(line[crate - 4 : crate][1:2])
                 stack += 1
-            
-    print(stacks_dynamic)
+
+def top_crates_on_stacks(stacks: dict) -> str:
+    result = ''
+    for stack in stacks:
+        result += stacks[stack][-1]
+    return result
 
 def main():
     filepath = path_to_data('data', 'input.txt')
@@ -61,7 +61,7 @@ def main():
                 drawing = False
             if drawing:
                 store_drawing(drawing_data, line)
-            elif line.startswith('move'):
+            elif line.startswith('move') and not drawing:
                 moves.append(line.split())
 
         process_drawing(drawing_data, stacks)

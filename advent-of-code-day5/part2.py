@@ -5,12 +5,6 @@ def path_to_data(data_folder: str, filename: str) -> str:
     data_file = os.path.join(main_dir, data_folder)
     return os.path.join(data_file, filename)
 
-def top_crates_on_stacks(stacks: dict) -> str:
-    result = ''
-    for stack in stacks:
-        result += stacks[stack][-1]
-    return result
-
 def store_drawing(drawing_data: list, data: str):
     drawing_data.append(data)
 
@@ -27,14 +21,20 @@ def process_drawing(drawing_data: list, stacks_dynamic: dict):
             line = line + ' '
             line_lenght = len(line)
             stack = 1
+            # consider using .split() instead of couting characters in string
             for crate in range(4, line_lenght + 1, 4):
+                # check if the crate is empty
                 if line[crate - 4 : crate][1:2] == ' ':
                     pass
                 else:
                     stacks_dynamic[str(stack)].append(line[crate - 4 : crate][1:2])
                 stack += 1
-            
-    print(stacks_dynamic)
+
+def top_crates_on_stacks(stacks: dict) -> str:
+    result = ''
+    for stack in stacks:
+        result += stacks[stack][-1]
+    return result
 
 def main():
     filepath = path_to_data('data', 'input.txt')
@@ -42,17 +42,6 @@ def main():
     drawing_data = []
     moves = []
     stacks = {}
-    # stacks_hard_coded = {
-    #         '1': ['P','F','M','Q','W','G','R','T'],
-    #         '2': ['H','F','R'],
-    #         '3': ['P','Z','R','V','G','H','S','D'],
-    #         '4': ['Q','H','P','B','F','W','G'],
-    #         '5': ['P','S','M','J','H'],
-    #         '6': ['M', 'Z', 'T', 'H', 'S', 'R', 'P', 'L'],
-    #         '7': ['P', 'T', 'H', 'N', 'M', 'L'],
-    #         '8': ['F', 'D', 'Q', 'R'],
-    #         '9': ['D', 'S', 'C', 'N', 'L', 'P', 'H']
-    #         }
 
     with open(filepath, 'r') as file:
         for line in file:
@@ -61,20 +50,33 @@ def main():
                 drawing = False
             if drawing:
                 store_drawing(drawing_data, line)
-            elif line.startswith('move'):
+            elif line.startswith('move') and not drawing:
                 moves.append(line.split())
 
-        process_drawing(drawing_data, stacks)
+    process_drawing(drawing_data, stacks)
+    print('Starting stacks:')
+    print(stacks)
 
-        for move in moves:
-            crates = int(move[1])
-            from_stack = move[3]
-            to_stack = move[5]
-            while crates > 0:
-                stacks[to_stack].append(stacks[from_stack].pop())
-                crates -= 1
-    print(top_crates_on_stacks(stacks))
+    ''' Process the moves. Consider making into function
+    Each move is a list element eg. ['move', '1', 'from', '2', 'to', '1']
+    index 1 is the amount of crates to move
+    from stack 2 (index 3) to stack 1 (index 5)
+    '''
+    for move in moves:
+        amount_of_crates = int(move[1])
+        from_stack = move[3]
+        to_stack = move[5]
+        crate_mover_9001 = []
+
+        # Grab crates from stack
+        for _ in range(amount_of_crates):
+            crate_mover_9001.append(stacks[from_stack].pop(-1))
+        crate_mover_9001.reverse()
+        stacks[to_stack] = stacks[to_stack] + crate_mover_9001
     
+    print('Resulting stacks:')
+    print(stacks)
+    print(top_crates_on_stacks(stacks))
 
 if __name__ == '__main__':
     main()
